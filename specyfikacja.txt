@@ -1,0 +1,197 @@
+
+Logo Onet
+Logo Onet Poczta
+Szukaj wiadomości
+Szukaj wiadomości
+
+
+REKLAMA
+
+
+Detal wiadomości
+KM Programs | Projekt Analiza Szeregów Pomiarowych
+K
+Krzysztof Makowski
+krzysztof@km-programs.pl
+24.08.2026, 13:01
+do mnie
+Obrazki nie są wyświetlane.
+
+Załączniki
+
+analiza-szeregow-pomiarowych.
+txt
+7.6 KB
+Reklama
+REKLAMA
+
+REKLAMA
+
+analiza-szeregow-pomiarowych.
+txt
+================================================================================
+SYSTEM ANALIZY SZEREGÓW POMIAROWYCH Z SIECI CZUJNIKÓW PRZEMYSŁOWYCH
+================================================================================
+
+Instalacja przemysłowa jest wyposażona w zestaw czujników rejestrujących wartości
+w stałym interwale czasowym. Rejestrator zapisuje surowe odczyty do plików
+tekstowych. Dane te nie nadają się do bezpośredniej analizy, ponieważ zawierają
+wartości nieskalibrowane, braki próbek oraz zakłócenia.
+
+Zadaniem jest zaprojektowanie i zaimplementowanie aplikacji konsolowej w C++,
+która wczytuje surowe dane, przetwarza je i generuje raport diagnostyczny oraz
+zestaw plików wynikowych.
+
+
+1. CEL I ZAKRES
+--------------------------------------------------------------------------------
+
+Aplikacja przetwarza dane z pliku konfiguracyjnego czujników i pliku
+pomiarowego, wykonuje kalibrację, kontrolę kompletności, filtrację, obliczenie
+statystyk oraz detekcję przekroczeń zakresu dopuszczalnego, a następnie zapisuje
+wyniki do plików raportu i danych wyjściowych.
+
+
+2. DANE WEJŚCIOWE
+--------------------------------------------------------------------------------
+
+Aplikacja korzysta z dwóch plików tekstowych. Pierwszy opisuje czujniki, drugi
+zawiera ich odczyty. Pliki są powiązane przez identyfikator czujnika.
+
+2.1. Plik konfiguracyjny czujników (sensors.txt)
+
+Jeden wiersz na czujnik. Wiersze rozpoczynające się znakiem # są komentarzem
+i są pomijane. Pola rozdzielone są białymi znakami.
+
+    # id  nazwa      jednostka  a       b      min_dop  max_dop
+    1     T_KOTLA    degC       0.0625  -40.0  -20.0    150.0
+    2     P_LINII    bar        0.0100  0.0    0.0      16.0
+    5     PRZEPLYW   m3h        0.2500  0.0    0.0      400.0
+
+Znaczenie pól:
+    id        - identyfikator czujnika, liczba całkowita dodatnia, unikalna
+    nazwa     - etykieta bez białych znaków, używana w raporcie
+    jednostka - jednostka wielkości fizycznej, używana w raporcie
+    a, b      - współczynniki kalibracji, liczby zmiennoprzecinkowe
+    min_dop   - dolna granica zakresu dopuszczalnego w jednostkach fizycznych
+    max_dop   - górna granica zakresu dopuszczalnego w jednostkach fizycznych
+
+2.2. Plik pomiarowy (measurements.txt)
+
+Pierwszy wiersz zawiera liczbę czujników R i liczbę próbek C. Drugi wiersz
+zawiera interwał próbkowania w sekundach. Następnie występuje R wierszy danych.
+
+Każdy wiersz danych rozpoczyna się identyfikatorem czujnika, po którym następuje
+dokładnie C wartości całkowitych będących surowymi odczytami. Wartość -9999
+oznacza brak próbki.
+
+    2 6
+    60
+    1  1023 1025 1029 1031 1030 1027
+    5  512  514  -9999 519 520  522
+
+2.3. Powiązanie plików
+
+Identyfikator z pierwszej kolumny wiersza pomiarowego wskazuje wpis w pliku
+konfiguracyjnym. Wiersz rozpoczynający się wartością 1 zawiera odczyty czujnika
+opisanego w konfiguracji jako T_KOTLA i podlega kalibracji jego współczynnikami.
+
+Kolejność wierszy w pliku pomiarowym nie musi odpowiadać kolejności wpisów
+w pliku konfiguracyjnym. Aplikacja buduje odwzorowanie identyfikatora czujnika na
+indeks wiersza macierzy. Sposób realizacji tego odwzorowania jest elementem
+projektu.
+
+Plik konfiguracyjny może opisywać więcej czujników niż występuje w danych
+pomiarowych. Sytuacja odwrotna, czyli odczyty czujnika nieopisanego
+w konfiguracji, jest błędem.
+
+Wymiary macierzy nie są znane w czasie kompilacji i muszą zostać odczytane
+z pliku.
+
+
+3. WYMAGANIA FUNKCJONALNE
+--------------------------------------------------------------------------------
+
+Aplikacja realizuje następujące operacje na macierzy pomiarowej.
+
+3.1. Wczytanie konfiguracji
+Wczytanie opisów czujników do dynamicznie alokowanej tablicy struktur. Pomijanie
+komentarzy i wierszy pustych. Kontrola unikalności identyfikatorów oraz poprawnej
+relacji min_dop < max_dop.
+
+3.2. Wczytanie pomiarów
+Wczytanie danych do dynamicznie alokowanej macierzy dwuwymiarowej o wymiarach
+R x C. Równolegle powstaje macierz ważności o tych samych wymiarach, typu
+logicznego, w której próbki o wartości -9999 są oznaczone jako nieważne.
+Powstaje także tablica odwzorowania wiążąca indeks wiersza macierzy z wpisem
+konfiguracyjnym.
+
+3.3. Kalibracja
+Przeliczenie odczytów surowych na wartości fizyczne według zależności
+wartosc = a * odczyt + b, z użyciem współczynników czujnika przypisanego do
+danego wiersza. Próbki nieważne nie podlegają przeliczeniu i zachowują status
+nieważnych.
+
+3.4. Kontrola kompletności
+Dla każdego czujnika wyznaczenie udziału próbek ważnych w całości szeregu.
+Czujnik, którego udział jest niższy od progu podanego w wywołaniu programu, jest
+oznaczany jako niewiarygodny. Czujnik bez żadnej próbki ważnej jest szczególnym
+przypadkiem niewiarygodnego i jest dodatkowo oznaczany jako nieaktywny. Status
+nieaktywny nie wyklucza czujnika z macierzy ani z plików wynikowych, ponieważ
+wszystkie jego próbki są już nieważne i naturalnie nie biorą udziału
+w statystykach (3.6) ani w detekcji przekroczeń (3.7). Oba stany są odnotowane
+w raporcie.
+
+3.5. Filtracja
+Obliczenie średniej ruchomej o oknie w podanym przez użytkownika, w liczbie
+próbek nieparzystej. Okno jest scentrowane na próbce przetwarzanej, czyli dla
+próbki o indeksie i obejmuje indeksy od i - (w-1)/2 do i + (w-1)/2. Przy
+brzegach szeregu okno jest przycinane do dostępnego zakresu indeksów. Do
+średniej wliczane są wyłącznie próbki ważne znajdujące się w oknie. Jeżeli okno
+nie zawiera żadnej próbki ważnej, wynik jest oznaczany jako nieważny. Wynik
+trafia do nowej macierzy o tych samych wymiarach R x C co macierz źródłowa,
+wraz z odpowiadającą jej nową macierzą ważności. Macierz źródłowa pozostaje
+niezmieniona.
+
+3.6. Statystyki
+Dla każdego czujnika wyznaczenie wartości minimalnej, maksymalnej, średniej
+i odchylenia standardowego, liczonych wyłącznie z próbek ważnych. Dodatkowo
+liczba próbek ważnych, liczba braków i udział procentowy kompletności.
+
+3.7. Detekcja przekroczeń
+Utworzenie macierzy flag R x C opisującej, czy dana próbka ważna mieści się
+w zakresie dopuszczalnym swojego czujnika. Próbki nieważne nie są traktowane jako
+przekroczenie. Wynikiem jest lista zdarzeń zawierająca identyfikator czujnika,
+indeks próbki początkowej i końcowej przekroczenia, kierunek przekroczenia oraz
+wartość skrajną wraz z jej indeksem. Brak próbki wewnątrz ciągu przekroczeń
+kończy zdarzenie.
+
+3.8. Zapis wyników
+Plik report.txt z tabelą statystyk i listą zdarzeń. Plik processed.txt
+z macierzą po kalibracji (wynik punktu 3.3, przed filtracją), w formacie
+zgodnym z wejściowym: pierwszy wiersz z liczbą czujników i próbek, drugi wiersz
+z interwałem próbkowania przepisanym z pliku wejściowego, następnie R wierszy
+z identyfikatorem czujnika w pierwszej kolumnie i znacznikiem -9999 dla próbek
+nieważnych. Plik aggregated.txt z macierzą po filtracji (wynik punktu 3.5),
+w tym samym układzie co processed.txt.
+
+3.9. Parametry wywołania
+Program przyjmuje jako argumenty wywołania z linii poleceń, w podanej
+kolejności:
+
+    1. ścieżkę pliku konfiguracyjnego czujników (sensors.txt)
+    2. ścieżkę pliku pomiarowego (measurements.txt)
+    3. ścieżkę pliku raportu (report.txt)
+    4. ścieżkę pliku danych po kalibracji (processed.txt)
+    5. ścieżkę pliku danych po filtracji (aggregated.txt)
+    6. szerokość okna filtra w, liczba nieparzysta
+    7. próg kompletności, liczba z przedziału [0, 1]
+
+Przykład wywołania:
+
+    program sensors.txt measurements.txt report.txt processed.txt
+        aggregated.txt 5 0.8
+
+
+1/1Załącznik 1 z 1
+

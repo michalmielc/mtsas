@@ -4,20 +4,22 @@
 
 project/
 ├── src/
+| 	├── fileImport.h
 │   ├── main.cpp
-│   ├── sensors.cpp
-│   ├── measurements.cpp
+│   ├── sensor.cpp
+│   ├── measurement.cpp
 │   ├── processing.cpp
-│   ├── statistics.cpp
-│   ├── limit_detections.cpp
+│   ├── statistic.cpp
+│   ├── limit_detection.cpp
 │   └── output.cpp
 │
 ├── include/
-│   ├── sensors.h
-│   ├── measurements.h
+|   ├── fileImport.h
+│   ├── sensor.h
+│   ├── measurement.h
 │   ├── processing.h
-│   ├── statistics.h
-│   ├── limit_detections.h
+│   ├── statistic.h
+│   ├── limit_detection.h
 │   └── output.h
 │
 ├── data/
@@ -89,8 +91,13 @@ Dane czujników i pomiarów.
 		    string unit;
 			double a,b;
 			double min, max;}
-						
-					
+--------------------------------------------------------------------------------		
+29.08.2026
+ - nie robiłem walidacji a,b, min, max w sensie czy jest double np dczy ktoś nie wpisał znaku, litery etc
+ - jeśli walidacja się nie powiedzie min max, id- to program się NIE WYKONA DO KOŃĆA
+ i rzucony zostanie wyjątek
+
+--------------------------------------------------------------------------------
 - 1.2 wczytanie danych z  measurements.txt.
 	    uwtorzenie dwóch macierzy z wynikami:
 		  double tableMeasurmentsAndSensorsId [sensorsCount][assayCount]

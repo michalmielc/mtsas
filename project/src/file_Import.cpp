@@ -2,49 +2,63 @@
 #include "file_import.h"
 #include <fstream>
 #include <stdexcept>
+#include <string>
+#include <sstream>
 
-int File_Import::sensorCount (const std::string & filePath){
-
-     std::ifstream file(filePath);
-
-    if (!file.is_open())
+int File_Import::maxSensorId(const std::string &filePath ){
+    std::ifstream file(filePath);
+    
+    if(!file.is_open())
     {
-        throw std::runtime_error("Cannot open file");
+        throw std::runtime_error("cannot open file sensors.txt");
     }
 
     std::string line;
-    int count = 0;
+    int maxId = 0;
 
-    while (std::getline(file, line))
-    {
-        std::size_t firstCharacter = line.find_first_not_of(" \t");
+    while(std::getline(file,line)) {
 
-        if (firstCharacter == std::string::npos)
+        std::size_t firstCharacter = line.find_first_not_of("\t");
+
+        if(firstCharacter ==std::string::npos || line[firstCharacter]=='#')
         {
             continue;
         }
 
-        if (line[firstCharacter] == '#')
+        std::istringstream stream (line);
+
+        int id;
+
+        stream >>id;
+
+        if(id>maxId)
         {
-            continue;
+            maxId = id;
         }
 
-        count++;
     }
 
-    return count;
+    return maxId;
 }
 
-bool File_Import::splitLine(const std::string &line, Sensor &sensor,  Sensor const *tableSensors, int index ){
+void File_Import::checkAndSplitLineSensorsFile(const std::string &line, Sensor *tableSensors ){
+
 
     std::istringstream stream(line);
-    stream >> sensor.id
+
+    Sensor sensor {};
+
+    //KONTROLA DANYCH CZUJNIKA
+    if(!( stream >> sensor.id
         >> sensor.name
         >> sensor.unit
         >> sensor.a
         >> sensor.b
         >> sensor.min
-        >> sensor.max;
+        >> sensor.max ))
+    {
+        throw std::invalid_argument("INVALID SENSOR DATA");
+    }
 
     //KONTORLA ID CZUJNIKA
     if(sensor.id <=0) 
@@ -60,24 +74,22 @@ bool File_Import::splitLine(const std::string &line, Sensor &sensor,  Sensor con
 
     //KONTROLA UNIKALNOŚCI IDENTYFIKATORÓW
 
-    for (int i = 0; i < index; i++)
+    if (tableSensors[sensor.id].id !=0)
     {
-        if(sensor.id==tableSensors[i].id)
-        {
-                throw std::invalid_argument("DUPLICATE SENSOR ID");
-        }
+        throw std::invalid_argument("DUPLICATE SENSOR ID");
     }
     
+    //WPROWADZENIE DANYCH DO MACIERZY
+    else{
+        tableSensors[sensor.id] = sensor;
+    }
 
-       return true;
   }
 
-Sensor *File_Import::readSensors( const std::string filePath, int sensorCount ){
+Sensor *File_Import::readSensors( const std::string filePath, int size ){
 
-    int index = 0;
 
-    Sensor *tableSensors = new Sensor[sensorCount];
-    Sensor tempSensor;  
+    Sensor *tableSensors = new Sensor[size] {};
 
     std::ifstream file(filePath);
 
@@ -99,24 +111,14 @@ Sensor *File_Import::readSensors( const std::string filePath, int sensorCount ){
         std::size_t firstCharacter = line.find_first_not_of(" \t");
 
         //TYLKO BIAŁE ZNAKI
-        if (firstCharacter == std::string::npos)
+        if (firstCharacter == std::string::npos ||  line[firstCharacter] == '#')
         {
             continue;
         }
 
-        //POMINIĘCIE KOMENTARZA
-        if (line[firstCharacter] == '#')
-        {
-            continue;
-        }
-
-       if( splitLine(line,tempSensor,tableSensors, index))
-       {
-        tableSensors[index] = tempSensor;
-        index ++;
-
-       }
-
+        //WCZYTANIE DO TABLICY
+         checkAndSplitLineSensorsFile(line,tableSensors);
+    
        
     }
 
@@ -124,5 +126,66 @@ Sensor *File_Import::readSensors( const std::string filePath, int sensorCount ){
        
   }
 
+Measurement *File_Import::readMeasurements(const std::string filePath, int maxId) {
 
-    
+
+    std::ifstream file(filePath);
+
+    if (!file.is_open())
+        {
+            throw std::runtime_error("Cannot open file: " + filePath);
+        }
+
+    // WCZYTANIE WYMIARÓW
+
+    int rows, cols, interval;
+
+    file >> rows >> cols;
+    file >> interval;
+
+    Measurement *measurements  = new Measurement(rows, cols, interval, maxId);
+
+
+   std::string line;
+
+    while (std::getline(file, line))
+    {
+        if (line.empty())
+        {
+            continue;
+        }
+
+        //POMINIĘCIE BIAŁYCH ZNAKÓW
+        std::size_t firstCharacter = line.find_first_not_of(" \t");
+
+        //TYLKO BIAŁE ZNAKI
+        if (firstCharacter == std::string::npos ||  line[firstCharacter] == '#')
+        {
+            continue;
+        }
+
+        //WCZYTANIE DO TABLICY
+
+        std::istringstream stream(line);
+
+        int id;
+        stream >>id;
+
+        for (int j = 0; j < cols; j++) {
+                int value;
+                stream >> value;
+
+                measurements->setMeasResult(id, j, value);
+
+        }
+       
+    }
+
+
+        
+    return measurements;
+};
+
+
+
+

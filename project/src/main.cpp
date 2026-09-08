@@ -2,29 +2,27 @@
 #include<print>
 #include<file_import.h>
 #include<sensor.h>
+#include<measurement.h>
 
 int main() {
 
-std::println ("WELCOME TO SENSOR ANALYSIS");
-
-File_Import fi;
-
-int sensorCount  = fi.sensorCount("project/data/sensors.txt");
-Sensor *ptrSensors  = fi.readSensors("project/data/sensors.txt",sensorCount);
-
-for (int i = 0; i < sensorCount; i++)
-{
-    std::println("{} {} {} {} {}", 
-        ptrSensors[i].id,
-        ptrSensors[i].name,
-        ptrSensors[i].unit,
-        ptrSensors[i].a,
-        ptrSensors[i].b,
-        ptrSensors[i].min,
-        ptrSensors[i].max
-    ) ;
-}
 
 
-return 0;
+    File_Import fi;
+    const int MAX_ID_SENSORS = fi.maxSensorId("project/data/sensors.txt") + 1;
+    Sensor *ptrSensors  = fi.readSensors("project/data/sensors.txt",MAX_ID_SENSORS);
+    Measurement *ptrMeasurements = fi.readMeasurements("project/data/measurements.txt",MAX_ID_SENSORS);
+
+    std::println ("WELCOME TO SENSOR ANALYSIS");
+    std::println ("SENSORS:");
+    ptrSensors->showSensorArray(ptrSensors,MAX_ID_SENSORS);
+
+    std::println ("--------------------------");
+    std::println ("MEASUREMENTS:");
+    ptrMeasurements->showMeasurementsArray();
+    std::println ("--------------------------");
+    ptrMeasurements->showMeasurementsValidationArray();
+
+
+    return 0;
 }

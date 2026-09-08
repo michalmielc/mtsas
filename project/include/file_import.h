@@ -3,24 +3,27 @@
 #include<string>
 #include<iostream>
 #include "sensor.h"
+#include "measurement.h"
 #include <sstream>
 
 //WCZYTANIE PLIKÓW
 class File_Import
 {
     public:
-    //POLICZENIE WIERSZY
-    int sensorCount (const std::string & filePath);
+    //POLICZENIE WIERSZY SPRAWDZIĆ PÓŹNIEJ, CZY SIĘ PRZYDA
+    //int sensorCount (const std::string & filePath);
 
-    //WCZYTANIE SENSORS.TXT
-    Sensor  *readSensors( const std::string filePath, int sensorCount);
+    //MAKSYMALNY INDEKS TABLICY
+    int maxSensorId(const std::string &filePath);
 
-    //PODZIAŁ LINII
-    bool splitLine(const std::string &line, Sensor &sensor,  Sensor const *tableSensors, int sensorCount );
+    //WCZYTANIE SENSORS.TXT NR WIERSZA ODPOWIADA ID CZUJNIKA
+    Sensor *readSensors( const std::string filePath, int maxId);
 
-    //------DO ZROBIENIA
+    //SPRAWDZENIE LINII I WPISANIE DO MACIERZY SENSORÓW
+    void checkAndSplitLineSensorsFile(const std::string &line,  Sensor *tableSensors );
+
     //WCZYTANIE MEASUREMENTS.TXT 
-    void readMeasurements( const std::string filePath);
+    Measurement *readMeasurements(const std::string filePath, int maxId);
 };
 
 

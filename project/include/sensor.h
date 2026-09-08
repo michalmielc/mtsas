@@ -8,4 +8,8 @@ struct  Sensor
 	std::string unit;
 	double a,b;
 	double min, max;
+
+void showSensorArray(Sensor* ptrSensors, int sensorCount);
+
+
 };

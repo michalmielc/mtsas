@@ -11,14 +11,18 @@ struct Measurement
    int **values;
    bool **isValid;
 
+   int* ptr = new int[maxId]{};
+
    //UWTORZENIE MACIERZY POMIAROW I WAŻNOSCI
-   Measurement (int r, int c, int i, int maxIdSensors)
+   Measurement (int r, int c, int itv, int maxIdSensors)
    {
-     
+       validation( r,  c,  itv,  maxIdSensors);
+
       rows = r;
       cols = c;
-      interval = i;
+      interval = itv;
       maxId = maxIdSensors;
+
 
       values = new int*[maxId];
       isValid = new bool*[maxId];
@@ -29,6 +33,68 @@ struct Measurement
          isValid[i] = new bool[cols]{};
       }
       
+   }
+
+   //DESTRUKTOR
+   ~Measurement(){
+      
+      
+      for (int i = 0; i < maxId; i++)
+      {
+         delete [] values[i];
+         delete [] isValid[i];
+      }
+
+      delete [] values;
+      delete [] isValid;
+      delete[] ptr;
+
+
+      values = nullptr;
+      isValid = nullptr;
+      ptr = nullptr;
+   }
+
+   //VALIDATION
+   void validation(int r, int c, int i, int maxIdSensors){
+      
+      if(r>std::numeric_limits<int>::max() || r <0)
+      {
+         throw std::invalid_argument("INAVLID VALUE OF ROWS");
+
+      }
+
+      if(c>std::numeric_limits<int>::max() || c <0)
+      {
+         throw std::invalid_argument("INAVLID VALUE OF COLS");
+         
+      }
+
+
+      if(i>std::numeric_limits<int>::max() || i <0)
+      {
+         throw std::invalid_argument("INAVLID VALUE OF INTERVAL");
+         
+      }
+
+      if(maxIdSensors>std::numeric_limits<int>::max() || maxIdSensors <=0)
+      {
+         throw std::invalid_argument("INAVLID VALUE MAX_ID_OF_SENSORS");
+         
+      }
+   
+   }
+
+   //SPRAWDZENIE UNKALNOŚCI ID
+   bool checkUniqueId(int id, int *ptr)
+   {
+      if(ptr[id]==0){
+         ptr[id]==1;
+         return true;
+      }
+      else {
+          return false;
+      }
    }
 
    //ZAPISANIE WYNIKU DO WIERSZA MACIERZY
@@ -44,6 +110,7 @@ struct Measurement
       }
 
    } 
+   
    //WYŚWIETLENIE MACIERZY POMIARÓW
   void showMeasurementsArray();
 

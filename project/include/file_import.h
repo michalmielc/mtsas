@@ -17,13 +17,13 @@ class File_Import
     int maxSensorId(const std::string &filePath);
 
     //WCZYTANIE SENSORS.TXT NR WIERSZA ODPOWIADA ID CZUJNIKA
-    Sensor *readSensors( const std::string filePath, int maxId);
+    Sensor *readSensors( const std::string &filePath, int maxId);
 
     //SPRAWDZENIE LINII I WPISANIE DO MACIERZY SENSORÓW
     void checkAndSplitLineSensorsFile(const std::string &line,  Sensor *tableSensors );
 
     //WCZYTANIE MEASUREMENTS.TXT 
-    Measurement *readMeasurements(const std::string filePath, int maxId);
+    Measurement *readMeasurements(const std::string &filePath, int maxId);
 };
 
 

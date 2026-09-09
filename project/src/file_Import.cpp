@@ -61,7 +61,7 @@ void File_Import::checkAndSplitLineSensorsFile(const std::string &line, Sensor *
     }
 
     //KONTORLA ID CZUJNIKA
-    if(sensor.id <=0) 
+    if(sensor.id <=0 || sensor.id > std::numeric_limits<int>::max()) 
     {
         throw std::invalid_argument("INVALID SENSOR ID");
     }   
@@ -86,7 +86,7 @@ void File_Import::checkAndSplitLineSensorsFile(const std::string &line, Sensor *
 
   }
 
-Sensor *File_Import::readSensors( const std::string filePath, int size ){
+Sensor *File_Import::readSensors( const std::string &filePath, int size ){
 
 
     Sensor *tableSensors = new Sensor[size] {};
@@ -126,7 +126,7 @@ Sensor *File_Import::readSensors( const std::string filePath, int size ){
        
   }
 
-Measurement *File_Import::readMeasurements(const std::string filePath, int maxId) {
+Measurement *File_Import::readMeasurements(const std::string &filePath, int maxId) {
 
 
     std::ifstream file(filePath);
@@ -171,14 +171,21 @@ Measurement *File_Import::readMeasurements(const std::string filePath, int maxId
         int id;
         stream >>id;
 
-        for (int j = 0; j < cols; j++) {
-                int value;
-                stream >> value;
-
-                measurements->setMeasResult(id, j, value);
-
+        if(id>maxId)
+        {
+            throw std::out_of_range("ID OF SENSOR IS OUT OF RANGE");
         }
        
+        if(measurements->checkUniqueId(id,measurements->ptr)){
+
+            for (int j = 0; j < cols; j++) {
+                    int value;
+                    stream >> value;
+
+                    measurements->setMeasResult(id, j, value);
+
+            }
+        }
     }
 
 

@@ -1,4 +1,9 @@
 #pragma once
+#include<stdexcept>
+#include <limits>
+
+
+
 struct Measurement
 
 {
@@ -6,12 +11,12 @@ struct Measurement
    int cols;
    int interval;
    int maxId;
-   const int NOT_VALID_ATTEPT = -9999;
+   static const int NOT_VALID_ATTEPT = -9999;
    
    int **values;
    bool **isValid;
+    int* ptr;    
 
-   int* ptr = new int[maxId]{};
 
    //UWTORZENIE MACIERZY POMIAROW I WAŻNOSCI
    Measurement (int r, int c, int itv, int maxIdSensors)
@@ -23,6 +28,7 @@ struct Measurement
       interval = itv;
       maxId = maxIdSensors;
 
+       ptr = new int[maxId]{};
 
       values = new int*[maxId];
       isValid = new bool*[maxId];
@@ -89,7 +95,7 @@ struct Measurement
    bool checkUniqueId(int id, int *ptr)
    {
       if(ptr[id]==0){
-         ptr[id]==1;
+         ptr[id]=1;
          return true;
       }
       else {

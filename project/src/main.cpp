@@ -24,5 +24,7 @@ int main() {
     ptrMeasurements->showMeasurementsValidationArray();
 
 
+   delete ptrMeasurements;
+   
     return 0;
 }

@@ -4,20 +4,22 @@
 
 project/
 ├── src/
+| 	├── fileImport.h
 │   ├── main.cpp
-│   ├── sensors.cpp
-│   ├── measurements.cpp
+│   ├── sensor.cpp
+│   ├── measurement.cpp
 │   ├── processing.cpp
-│   ├── statistics.cpp
-│   ├── limit_detections.cpp
+│   ├── statistic.cpp
+│   ├── limit_detection.cpp
 │   └── output.cpp
 │
 ├── include/
-│   ├── sensors.h
-│   ├── measurements.h
+|   ├── fileImport.h
+│   ├── sensor.h
+│   ├── measurement.h
 │   ├── processing.h
-│   ├── statistics.h
-│   ├── limit_detections.h
+│   ├── statistic.h
+│   ├── limit_detection.h
 │   └── output.h
 │
 ├── data/
@@ -80,7 +82,8 @@ Dane czujników i pomiarów.
 
 1. Wczytanie danych.					  
 - 1.1 wczytanie danych z pliku sensors.txt.
-      uwtorzenie tablicy struktur i wczytanie do niej danych z pliku:
+	Wczytanie odbywa się poprzez klasę file_import.		
+    Uwtorzenie tablicy struktur i wczytanie do niej danych z pliku:
 	  Sensors tableSensors[sensorsCount]
 		Sensors {
 			//pola
@@ -89,27 +92,26 @@ Dane czujników i pomiarów.
 		    string unit;
 			double a,b;
 			double min, max;}
-						
-					
+
+Przy czym każdy wiersz tablicy odpowiada nr czujnika.
+Tablica jest wyzerowana w miejscach, gdzie nr wiersza nie odpowiada żadnemu id czujnika.
+
 - 1.2 wczytanie danych z  measurements.txt.
-	    uwtorzenie dwóch macierzy z wynikami:
-		  double tableMeasurmentsAndSensorsId [sensorsCount][assayCount]
-		  oraz z wartościami bool
-		  bool tableMeasurmentsAndSensorsId [sensorsCount][assayCount]
-		wczytanie do nich danych z pliku measurements.txt			
+Wczytanie odbywa się poprzez klasę file_import do struktury Measurement.
+
+uwtorzenie dwóch macierzy z wynikami oraz z wartościami bool:
+**values, **isValid;
 		
-        Utworzenie tablicy tzw join nr wiersza macierzy z plikiem konfiguracyjnym 
-                            
-        int tableJoinAssaysWithSensorsId [assayCount]
-        czyli np  dla pomiarów:
-                            
-        1  pomiar1 pomair2 ...
-        5  pomiar1 pomair2 ...
-                        
-        tableJoinAssaysWithSensorsId[0] = 1
-        tableJoinAssaysWithSensorsId[1] = 5
-						
-	utworzenie funkcji wyszukującej findRowInMatrixMeasuremets(int id) i zwracającej nr wiersza
+Gdzie numer wiersza odpowiada numerowi czujnika.
+
+--------------------------------------------------------------------------------		
+PYTANIA DO KRZYSZTOFA:
+
+ - nie robiłem walidacji a,b, min, max w sensie czy jest double np dczy ktoś nie wpisał znaku, litery etc
+ - czy pomiary mogą się powtarzac dla czujnika ( więcej niż w jednym wierszu ). Nie ma o tym słowa w opisie
+
+--------------------------------------------------------------------------------
+
 
 2. Kalibracja
    Przeliczenie odczytów i zapis w tablicy:

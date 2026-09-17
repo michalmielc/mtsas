@@ -1,0 +1,8 @@
+  # id  nazwa       jednostka  a       b      min_dop  max_dop
+    1   T_KOTLA     degC       0.0625  -40.0  -20.0    150.0
+    2   P_LINII     bar        0.0100  0.0    0.0      16.0
+    5   PRZEPLYW    m3h        0.2500  0.0    0.0      400.0
+    8  P2_LINII    bar        0.0100  0.0    0.0      16.9
+    11  PRZEPLYW2   m3h        0.2519  0.0    0.0      377.0
+    13 P_LINII3    bar        0.0113  0.0    0.0      18.0
+    15 PRZEPLYW4   m3h        0.2500  0.0    0.0      400.0

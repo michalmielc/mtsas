@@ -1,8 +1,5 @@
 #pragma once
 #include<stdexcept>
-#include <limits>
-
-
 
 struct Measurement
 
@@ -28,17 +25,48 @@ struct Measurement
       interval = itv;
       maxId = maxIdSensors;
 
-       ptr = new int[maxId]{};
+      values = nullptr;
+      isValid = nullptr;
+      ptr = nullptr; 
 
-      values = new int*[maxId];
-      isValid = new bool*[maxId];
-      
-      for (int i = 0; i < maxId; i++)
-      {
-         values[i] = new int[cols]{};
-         isValid[i] = new bool[cols]{};
+      try{
+
+         ptr = new int[maxId]{};
+
+         values = new int*[maxId];
+         isValid = new bool*[maxId];
+         
+         for (int i = 0; i < maxId; i++)
+         {
+            values[i] = new int[cols]{};
+            isValid[i] = new bool[cols]{};
+         }
       }
-      
+
+      catch(...){
+       
+         if (values != nullptr)
+        {
+            for (int i = 0; i < maxId; i++)
+            {
+                delete[] values[i];
+            }
+        }
+
+        if (isValid != nullptr)
+        {
+            for (int i = 0; i < maxId; i++)
+            {
+                delete[] isValid[i];
+            }
+        }
+
+        delete[] values;
+        delete[] isValid;
+        delete[] ptr;
+
+        throw;
+      }
    }
 
    //DESTRUKTOR
@@ -61,29 +89,33 @@ struct Measurement
       ptr = nullptr;
    }
 
+   //REGUŁA TRZECH
+   Measurement(const Measurement&) = delete;
+   Measurement& operator=(const Measurement&) = delete;
+
    //VALIDATION
-   void validation(int r, int c, int i, int maxIdSensors){
+   void validation(int r, int c, int itv, int maxIdSensors){
       
-      if(r>std::numeric_limits<int>::max() || r <0)
+      if(r <= 0)
       {
          throw std::invalid_argument("INAVLID VALUE OF ROWS");
 
       }
 
-      if(c>std::numeric_limits<int>::max() || c <0)
+      if(c<=0)
       {
          throw std::invalid_argument("INAVLID VALUE OF COLS");
          
       }
 
 
-      if(i>std::numeric_limits<int>::max() || i <0)
+      if(itv<=0)
       {
          throw std::invalid_argument("INAVLID VALUE OF INTERVAL");
          
       }
 
-      if(maxIdSensors>std::numeric_limits<int>::max() || maxIdSensors <=0)
+      if( maxIdSensors <=0)
       {
          throw std::invalid_argument("INAVLID VALUE MAX_ID_OF_SENSORS");
          
